@@ -1,0 +1,18 @@
+{
+  "name": "@mern/web",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'Configure dev script'",
+    "build": "echo 'Configure build script'",
+    "lint": "echo 'Configure lint script'",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@shared/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

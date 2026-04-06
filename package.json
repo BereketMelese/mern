@@ -1,0 +1,26 @@
+{
+  "name": "mern-monorepo",
+  "version": "1.0.0",
+  "description": "MERN monorepo with pnpm workspaces",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r --filter ./packages --parallel run build && pnpm -r --filter ./apps --parallel run build",
+    "lint": "pnpm -r run lint",
+    "type-check": "pnpm -r run type-check",
+    "format": "pnpm -r run format",
+    "clean": "pnpm -r run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
