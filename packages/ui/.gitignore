@@ -1,0 +1,12 @@
+# Build output
+dist/
+storybook-static/
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# IDE
+.DS_Store
+*.swp
+*.swo

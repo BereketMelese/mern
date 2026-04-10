@@ -20,7 +20,18 @@
     "format": "pnpm -r run format",
     "clean": "pnpm -r run clean && rm -rf node_modules"
   },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "0.21.5"
+    }
+  },
   "devDependencies": {
+    "@storybook/addon-essentials": "^7.6.0",
+    "@storybook/addon-interactions": "^7.6.0",
+    "@storybook/react": "^7.6.0",
+    "@storybook/react-vite": "^7.6.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "storybook": "^10.3.6",
     "typescript": "^5.3.0"
   }
 }
