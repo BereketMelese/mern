@@ -37,6 +37,11 @@ function ModalStory() {
 }
 
 export const Default: Story = {
+  args: {
+    isOpen: false,
+    onClose: () => undefined,
+    children: null,
+  },
   render: () => <ModalStory />,
 };
 
@@ -71,6 +76,11 @@ function ConfirmModal() {
 }
 
 export const ConfirmDialog: Story = {
+  args: {
+    isOpen: false,
+    onClose: () => undefined,
+    children: null,
+  },
   render: () => <ConfirmModal />,
 };
 
@@ -102,5 +112,10 @@ function LargeModal() {
 }
 
 export const LargeDialog: Story = {
+  args: {
+    isOpen: false,
+    onClose: () => undefined,
+    children: null,
+  },
   render: () => <LargeModal />,
 };

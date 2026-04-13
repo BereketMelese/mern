@@ -12,6 +12,7 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
+    "ignoreDeprecations": "5.0",
     "isolatedModules": true,
     "noEmit": true,
     "strict": true,
@@ -26,15 +27,9 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": true
 
     /* Path mapping */
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["packages/shared/src/*"],
-      "@ui/*": ["packages/ui/src/*"],
-      "@/*": ["src/*"]
-    }
   },
   "include": [
     "packages/**/*.ts",

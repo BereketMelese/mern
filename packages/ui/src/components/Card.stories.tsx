@@ -14,6 +14,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {
+    children: null,
+  },
   render: () => (
     <Card className="w-80">
       <Card.Body>
@@ -24,6 +27,9 @@ export const Default: Story = {
 };
 
 export const WithHeader: Story = {
+  args: {
+    children: null,
+  },
   render: () => (
     <Card className="w-80">
       <Card.Header>
@@ -37,6 +43,9 @@ export const WithHeader: Story = {
 };
 
 export const WithFooter: Story = {
+  args: {
+    children: null,
+  },
   render: () => (
     <Card className="w-80">
       <Card.Header>
@@ -55,6 +64,9 @@ export const WithFooter: Story = {
 };
 
 export const CompleteExample: Story = {
+  args: {
+    children: null,
+  },
   render: () => (
     <Card className="w-96">
       <Card.Header>
