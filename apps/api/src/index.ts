@@ -1,6 +1,7 @@
 import express from "express";
 import usersRouter from "./routes/users.js";
 import productsRouter from "./routes/products.js";
+import authRouter from "./routes/auth.js";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 app.get("/", (_req, res) => res.json({ status: "ok", version: "0.0.1" }));
 
+app.use("/auth", authRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 

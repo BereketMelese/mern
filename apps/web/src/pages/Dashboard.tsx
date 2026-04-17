@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { ChangeEvent } from "react";
-import axios from "axios";
 import { Card, Button, Input } from "@repo/ui";
 import { MainLayout } from "../components/MainLayout";
+import { apiClient } from "../utils/apiClient";
 import type { User, Product } from "@shared/utils";
-
-const API_BASE_URL = "http://localhost:4000";
 
 export const Dashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -24,8 +22,8 @@ export const Dashboard = () => {
       setLoading(true);
       try {
         const [usersRes, productsRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/users`),
-          axios.get(`${API_BASE_URL}/products`),
+          apiClient.get("/users"),
+          apiClient.get("/products"),
         ]);
         setUsers(usersRes.data);
         setProducts(productsRes.data);
@@ -42,7 +40,7 @@ export const Dashboard = () => {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_BASE_URL}/products`, newProduct);
+      const res = await apiClient.post("/products", newProduct);
       setProducts([...products, res.data]);
       setNewProduct({
         name: "",

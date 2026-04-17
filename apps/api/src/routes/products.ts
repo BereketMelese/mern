@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
+import { verifyToken, AuthRequest } from "../middleware/auth.js";
 import type { Product as SharedProduct } from "@shared/utils";
 
 const prisma = new PrismaClient();
@@ -15,9 +16,9 @@ router.get("/", async (_req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req: AuthRequest, res) => {
   try {
-    const { name, description, price, category, stock, ownerId } = req.body;
+    const { name, description, price, category, stock } = req.body;
     const product = await prisma.product.create({
       data: {
         name,
@@ -25,7 +26,7 @@ router.post("/", async (req, res) => {
         price: Number(price) || 0,
         category,
         stock: Number(stock) || 0,
-        ownerId: ownerId || undefined,
+        ownerId: req.userId,
       },
     });
     res.status(201).json(product as SharedProduct);
