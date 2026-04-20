@@ -7,6 +7,7 @@ This MERN monorepo now includes complete JWT authentication with bcrypt password
 ## Architecture
 
 ### Shared Types (@shared/utils)
+
 ```typescript
 interface AuthUser {
   id: string;
@@ -35,6 +36,7 @@ interface AuthResponse {
 ## Backend Implementation (@mern/api)
 
 ### Auth Middleware (`src/middleware/auth.ts`)
+
 - `verifyToken`: Express middleware that validates JWT tokens
 - `generateToken`: Creates JWT tokens with 24-hour expiration
 - `AuthRequest`: Extended Express Request with userId
@@ -42,37 +44,44 @@ interface AuthResponse {
 ### Auth Routes (`src/routes/auth.ts`)
 
 **POST /auth/register**
+
 - Creates new user account
 - Validates input (email, password, name required)
 - Hashes password with bcrypt
 - Returns JWT token and user data
 
 **POST /auth/login**
+
 - Authenticates user with email and password
 - Validates password against bcrypt hash
 - Returns JWT token on success
 - Returns 401 on invalid credentials
 
 **POST /auth/logout**
+
 - Handles logout (token removal happens client-side)
 
 ### Protected Routes
+
 - `GET /users` - Requires authentication
 - `POST /products` - Requires authentication (auto-assigns ownerId)
 
 ### Database Schema Update
+
 - Added `password: String` field to User model
 - Migration: `20260505233706_add_password_to_users`
 
 ## Frontend Implementation (@mern/web)
 
 ### Auth Context (`src/context/AuthContext.tsx`)
+
 - Manages global authentication state
 - Provides `useAuth()` hook for consuming components
 - Methods: `login()`, `register()`, `logout()`
 - Stores token in `sessionStorage`
 
 ### API Client (`src/utils/apiClient.ts`)
+
 - Axios instance with base URL configuration
 - Request interceptor: Automatically adds token to all requests
   ```
@@ -81,6 +90,7 @@ interface AuthResponse {
 - Response interceptor: Redirects to /login on 401 (unauthorized)
 
 ### Protected Route Component (`src/components/ProtectedRoute.tsx`)
+
 - Wraps routes that require authentication
 - Shows loading state while checking auth
 - Redirects unauthenticated users to /login
@@ -88,12 +98,14 @@ interface AuthResponse {
 ### Auth Pages
 
 **Login Page** (`src/pages/Login.tsx`)
+
 - Email and password inputs
 - Error handling and feedback
 - Loading state during submission
 - Link to register page
 
 **Register Page** (`src/pages/Register.tsx`)
+
 - Email, password, confirm password, name inputs
 - Password validation (min 6 characters)
 - Password match verification
@@ -103,22 +115,26 @@ interface AuthResponse {
 ### Updated Components
 
 **Header** (`src/components/Header.tsx`)
+
 - Shows user email/name when authenticated
 - Logout button for authenticated users
 - Login button for unauthenticated users
 - Dashboard link only visible when authenticated
 
 **Home** (`src/pages/Home.tsx`)
+
 - Updated CTA to "Get Started" -> Register when not authenticated
 - Shows registration link
 
 **Dashboard** (`src/pages/Dashboard.tsx`)
+
 - Uses `apiClient` instead of raw axios
 - Protected route ensures only authenticated users access
 
 ## Usage Flow
 
 ### Registration
+
 1. User clicks "Get Started" on home page
 2. Navigates to `/register`
 3. Enters email, password, name
@@ -127,6 +143,7 @@ interface AuthResponse {
 6. User automatically logged in and redirected to /dashboard
 
 ### Login
+
 1. User clicks "Login" in header or navigates to `/login`
 2. Enters email and password
 3. Form submits to POST /auth/login
@@ -134,6 +151,7 @@ interface AuthResponse {
 5. User redirected to /dashboard
 
 ### Protected Access
+
 1. Dashboard route is wrapped with `<ProtectedRoute>`
 2. Check if token exists in sessionStorage
 3. If no token, redirect to /login
@@ -141,6 +159,7 @@ interface AuthResponse {
 5. API requests automatically include token in Authorization header
 
 ### Logout
+
 1. User clicks "Logout" in header
 2. API call to POST /auth/logout
 3. Token removed from sessionStorage
@@ -150,6 +169,7 @@ interface AuthResponse {
 ## Environment Variables
 
 For production, add to `.env`:
+
 ```
 JWT_SECRET=your-long-random-secret-key
 ```
@@ -169,6 +189,7 @@ Default in development: `"your-secret-key-change-in-production"`
 ## Testing
 
 ### Register a New User
+
 ```bash
 curl -X POST http://localhost:4000/auth/register \
   -H "Content-Type: application/json" \
@@ -180,6 +201,7 @@ curl -X POST http://localhost:4000/auth/register \
 ```
 
 ### Login
+
 ```bash
 curl -X POST http://localhost:4000/auth/login \
   -H "Content-Type: application/json" \
@@ -190,6 +212,7 @@ curl -X POST http://localhost:4000/auth/login \
 ```
 
 ### Access Protected Route
+
 ```bash
 curl -X GET http://localhost:4000/users \
   -H "Authorization: Bearer {token}"
@@ -240,17 +263,19 @@ packages/
 ## Troubleshooting
 
 ### "Invalid token" on protected routes
+
 - Check token is valid in sessionStorage
 - Verify API is using verifyToken middleware
 - Check JWT_SECRET matches on API
 
 ### 401 Unauthorized redirect
+
 - Session may have expired (24-hour token)
 - Re-login required
 - Check API response interceptor
 
 ### CORS errors on auth requests
+
 - API running on port 4000
 - Web running on port 5173
 - Ensure API is started first
-

@@ -119,10 +119,13 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
  * POST /auth/logout
  * Logout user (token invalidation happens on client side)
  */
-router.post("/logout", async (_req: AuthRequest, res: Response): Promise<void> => {
-  // In a real app, you might want to blacklist tokens here
-  // For now, just return success
-  res.json({ message: "Logged out successfully" });
-});
+router.post(
+  "/logout",
+  async (_req: AuthRequest, res: Response): Promise<void> => {
+    // In a real app, you might want to blacklist tokens here
+    // For now, just return success
+    res.json({ message: "Logged out successfully" });
+  },
+);
 
 export default router;

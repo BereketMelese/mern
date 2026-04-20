@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production";
+const JWT_SECRET =
+  process.env.JWT_SECRET || "your-secret-key-change-in-production";
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -10,7 +11,7 @@ export interface AuthRequest extends Request {
 export const verifyToken = (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const token = req.headers.authorization?.split(" ")[1];
 

@@ -31,6 +31,14 @@ export const Header = () => {
               About
             </Link>
           </li>
+          <li>
+            <Link
+              to="/products"
+              className="text-gray-700 hover:text-primary-600 transition"
+            >
+              Products
+            </Link>
+          </li>
           {isAuthenticated && (
             <li>
               <Link

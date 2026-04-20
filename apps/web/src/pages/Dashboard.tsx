@@ -1,14 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChangeEvent } from "react";
 import { Card, Button, Input } from "@repo/ui";
 import { MainLayout } from "../components/MainLayout";
-import { apiClient } from "../utils/apiClient";
-import type { User, Product } from "@shared/utils";
+import {
+  useFetchUsers,
+  useFetchProducts,
+  useCreateProduct,
+} from "../hooks/useQueries";
+import { CreateProductSchema } from "@shared/utils";
+import { ZodError } from "zod";
 
 export const Dashboard = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    data: users,
+    isLoading: usersLoading,
+    error: usersError,
+  } = useFetchUsers();
+  const {
+    data: products,
+    isLoading: productsLoading,
+    error: productsError,
+  } = useFetchProducts();
+  const createProductMutation = useCreateProduct();
+
   const [newProduct, setNewProduct] = useState({
     name: "",
     description: "",
@@ -17,31 +31,41 @@ export const Dashboard = () => {
     stock: 0,
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [usersRes, productsRes] = await Promise.all([
-          apiClient.get("/users"),
-          apiClient.get("/products"),
-        ]);
-        setUsers(usersRes.data);
-        setProducts(productsRes.data);
-      } catch (err) {
-        console.error("Failed to fetch data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [submitError, setSubmitError] = useState<string>("");
+  const [submitSuccess, setSubmitSuccess] = useState<string>("");
 
-    fetchData();
-  }, []);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewProduct((prev) => ({
+      ...prev,
+      [name]: name === "price" || name === "stock" ? Number(value) : value,
+    }));
+    // Clear error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError("");
+    setSubmitSuccess("");
+    setValidationErrors({});
+
     try {
-      const res = await apiClient.post("/products", newProduct);
-      setProducts([...products, res.data]);
+      // Validate with Zod
+      const validatedData = CreateProductSchema.parse(newProduct);
+
+      // Submit mutation
+      await createProductMutation.mutateAsync(validatedData);
+
+      // Reset form
       setNewProduct({
         name: "",
         description: "",
@@ -49,8 +73,23 @@ export const Dashboard = () => {
         category: "",
         stock: 0,
       });
+
+      setSubmitSuccess("Product added successfully!");
+      setTimeout(() => setSubmitSuccess(""), 3000);
     } catch (err) {
-      console.error("Failed to add product:", err);
+      if (err instanceof ZodError) {
+        // Format Zod errors
+        const errors: Record<string, string> = {};
+        err.errors.forEach((error) => {
+          const field = error.path[0] as string;
+          errors[field] = error.message;
+        });
+        setValidationErrors(errors);
+      } else if (err instanceof Error) {
+        setSubmitError(err.message || "Failed to add product");
+      } else {
+        setSubmitError("Failed to add product. Please try again.");
+      }
     }
   };
 
@@ -62,23 +101,27 @@ export const Dashboard = () => {
         {/* Users Section */}
         <Card>
           <Card.Header>
-            <h2 className="text-2xl font-semibold">Users ({users.length})</h2>
+            <h2 className="text-2xl font-semibold">
+              Users ({users?.length ?? 0})
+            </h2>
           </Card.Header>
           <Card.Body>
-            {loading ? (
+            {usersError ? (
+              <div className="bg-red-50 border border-red-200 rounded px-4 py-3 text-red-700">
+                Failed to load users. Please try again.
+              </div>
+            ) : usersLoading ? (
               <p className="text-gray-600">Loading users...</p>
-            ) : users.length === 0 ? (
-              <p className="text-gray-600">No users found.</p>
-            ) : (
+            ) : users && users.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-left">
+                <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-gray-200">
-                      <th className="pb-2 font-semibold text-gray-700">
+                      <th className="pb-3 font-semibold text-gray-700">
                         Email
                       </th>
-                      <th className="pb-2 font-semibold text-gray-700">Name</th>
-                      <th className="pb-2 font-semibold text-gray-700">Role</th>
+                      <th className="pb-3 font-semibold text-gray-700">Name</th>
+                      <th className="pb-3 font-semibold text-gray-700">Role</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -95,6 +138,8 @@ export const Dashboard = () => {
                   </tbody>
                 </table>
               </div>
+            ) : (
+              <p className="text-gray-600">No users found.</p>
             )}
           </Card.Body>
         </Card>
@@ -105,13 +150,17 @@ export const Dashboard = () => {
             <Card>
               <Card.Header>
                 <h2 className="text-2xl font-semibold">
-                  Products ({products.length})
+                  Products ({products?.length ?? 0})
                 </h2>
               </Card.Header>
               <Card.Body>
-                {products.length === 0 ? (
-                  <p className="text-gray-600">No products found.</p>
-                ) : (
+                {productsError ? (
+                  <div className="bg-red-50 border border-red-200 rounded px-4 py-3 text-red-700">
+                    Failed to load products. Please try again.
+                  </div>
+                ) : productsLoading ? (
+                  <p className="text-gray-600">Loading products...</p>
+                ) : products && products.length > 0 ? (
                   <div className="space-y-4">
                     {products.map((product) => (
                       <div
@@ -127,7 +176,7 @@ export const Dashboard = () => {
                         <div className="flex justify-between items-center">
                           <div>
                             <span className="text-lg font-bold text-primary-600">
-                              ${product.price}
+                              ${product.price.toFixed(2)}
                             </span>
                             <span className="text-gray-600 ml-4">
                               Stock: {product.stock}
@@ -140,6 +189,8 @@ export const Dashboard = () => {
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <p className="text-gray-600">No products found.</p>
                 )}
               </Card.Body>
             </Card>
@@ -152,58 +203,108 @@ export const Dashboard = () => {
                 <h3 className="text-xl font-semibold">Add Product</h3>
               </Card.Header>
               <Card.Body>
-                <form onSubmit={handleAddProduct} className="space-y-4">
-                  <Input
-                    label="Name"
-                    value={newProduct.name}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setNewProduct({ ...newProduct, name: e.target.value })
-                    }
-                    required
-                  />
-                  <Input
-                    label="Description"
-                    value={newProduct.description}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setNewProduct({
-                        ...newProduct,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                  <Input
-                    label="Price"
-                    type="number"
-                    value={newProduct.price}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setNewProduct({
-                        ...newProduct,
-                        price: Number(e.target.value),
-                      })
-                    }
-                    required
-                  />
-                  <Input
-                    label="Category"
-                    value={newProduct.category}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setNewProduct({ ...newProduct, category: e.target.value })
-                    }
-                  />
-                  <Input
-                    label="Stock"
-                    type="number"
-                    value={newProduct.stock}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setNewProduct({
-                        ...newProduct,
-                        stock: Number(e.target.value),
-                      })
-                    }
-                    required
-                  />
-                  <Button type="submit" variant="primary" className="w-full">
-                    Add Product
+                {submitSuccess && (
+                  <div className="mb-4 bg-green-50 border border-green-200 rounded px-4 py-3 text-green-700 text-sm">
+                    {submitSuccess}
+                  </div>
+                )}
+                {submitError && (
+                  <div className="mb-4 bg-red-50 border border-red-200 rounded px-4 py-3 text-red-700 text-sm">
+                    {submitError}
+                  </div>
+                )}
+
+                <form onSubmit={handleAddProduct} className="space-y-3">
+                  <div>
+                    <Input
+                      label="Name"
+                      name="name"
+                      value={newProduct.name}
+                      onChange={handleInputChange}
+                      required
+                      disabled={createProductMutation.isPending}
+                    />
+                    {validationErrors.name && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {validationErrors.name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Input
+                      label="Description"
+                      name="description"
+                      value={newProduct.description}
+                      onChange={handleInputChange}
+                      disabled={createProductMutation.isPending}
+                    />
+                    {validationErrors.description && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {validationErrors.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Input
+                      label="Price"
+                      name="price"
+                      type="number"
+                      step="0.01"
+                      value={newProduct.price}
+                      onChange={handleInputChange}
+                      required
+                      disabled={createProductMutation.isPending}
+                    />
+                    {validationErrors.price && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {validationErrors.price}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Input
+                      label="Category"
+                      name="category"
+                      value={newProduct.category}
+                      onChange={handleInputChange}
+                      disabled={createProductMutation.isPending}
+                    />
+                    {validationErrors.category && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {validationErrors.category}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Input
+                      label="Stock"
+                      name="stock"
+                      type="number"
+                      value={newProduct.stock}
+                      onChange={handleInputChange}
+                      required
+                      disabled={createProductMutation.isPending}
+                    />
+                    {validationErrors.stock && (
+                      <p className="text-red-600 text-sm mt-1">
+                        {validationErrors.stock}
+                      </p>
+                    )}
+                  </div>
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="w-full"
+                    disabled={createProductMutation.isPending}
+                  >
+                    {createProductMutation.isPending
+                      ? "Adding..."
+                      : "Add Product"}
                   </Button>
                 </form>
               </Card.Body>
