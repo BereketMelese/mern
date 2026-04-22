@@ -6,7 +6,7 @@ import {
   ReactNode,
 } from "react";
 import type { AuthUser } from "@shared/utils";
-import axios from "axios";
+import { apiClient } from "../utils/apiClient";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post("/auth/login", { email, password });
+      const response = await apiClient.post("/auth/login", { email, password });
       const { user: authUser, token } = response.data;
       sessionStorage.setItem("authToken", token);
       setUser(authUser);
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (email: string, password: string, name: string) => {
     try {
-      const response = await axios.post("/auth/register", {
+      const response = await apiClient.post("/auth/register", {
         email,
         password,
         name,
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
-      await axios.post("/auth/logout");
+      await apiClient.post("/auth/logout");
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {

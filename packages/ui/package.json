@@ -17,6 +17,7 @@
     "build:css": "tailwindcss -i src/styles/globals.css -o dist/styles.css --minify",
     "build": "pnpm run build:css && tsup",
     "dev": "tsup --watch",
+    "lint": "eslint src --ext .ts,.tsx",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "clean": "rm -rf dist storybook-static"
