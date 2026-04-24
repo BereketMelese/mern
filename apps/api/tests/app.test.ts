@@ -36,7 +36,8 @@ describe("api app", () => {
     const response = await request(app).get("/health");
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ status: "ok" });
+    expect(response.body.status).toBe("ok");
+    expect(response.body.uptime).toEqual(expect.any(Number));
     expect(prismaMock.$connect).toHaveBeenCalledTimes(1);
     expect(prismaMock.$disconnect).toHaveBeenCalledTimes(1);
   });

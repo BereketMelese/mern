@@ -15,6 +15,10 @@
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "dev:apps": "pnpm -r --parallel --filter @mern/api --filter @mern/web run dev",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down -v",
+    "docker:build": "docker compose build",
+    "docker:logs": "docker compose logs -f",
     "build": "pnpm -r --filter ./packages --parallel run build && pnpm -r --filter ./apps --parallel run build",
     "prepare": "husky",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
